@@ -35,7 +35,7 @@ setup(
     ],
     entry_points={
         'mopidy.ext': [
-            'ttsgpio = mopidy_ttsgpio:Extension',
+            'vintageradiojukebox = mopidy_vintageradiojukebox:Extension',
         ],
     },
     classifiers=[
