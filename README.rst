@@ -66,4 +66,4 @@ Changelog
 v1.0.0
 ----------------------------------------
 
-- Fork from mopify-ttsgpio
+- Fork from mopidy-ttsgpio
