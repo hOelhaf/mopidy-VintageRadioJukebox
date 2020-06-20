@@ -23,7 +23,7 @@ after_success:
 notifications:
   email:
     recipients:
-      - 9and3r@gmail.com
+      - h.Oelhaf@gmail.com
     on_success: change
     on_failure: change
 
