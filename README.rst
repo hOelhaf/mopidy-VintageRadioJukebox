@@ -2,6 +2,8 @@
 Mopidy-VintageRadioJukebox
 ****************************
 
+!!! Still under transition from mopidy-ttsgpio to mopidy-VintageRadioJukebox !!!
+
 Control mopidy without screen using GPIO and TTS
 
 For example if you play "Rather Be - Clean Bandit" you will hear:
