@@ -17,8 +17,7 @@ TTS changed to `Festival <http://www.cstr.ed.ac.uk/projects/festival/>`_. Instal
 Features
 ========
 
-- Led to see if it is playing
-- Next/Previous track by rotary encoder
+- Next/Previous station by rotary encoder
 - Select playlist by GPIO
 - Hear the station name (Text To Speech)
 - Shutdown
@@ -47,9 +46,12 @@ Mopidy-VintageRadioJukebox to your Mopidy configuration file::
 
     [ttsgpio]
     debug_gpio_simulate = false # Set true to emulate GPIO buttons with on screen buttons
+    playlist   = pin, playlistName
+    navigation = pinEncA, pinEncB
+    shutdown   = pin
     TODO:
-    [pin] [playlist|navigation|volume|shutdown] [playlistName]
-    
+    volume     = pinEncA, pinEncB
+
 You can set the pins you would like to use. The numbers are in BCM mode. You can check `here <http://raspberrypi.stackexchange.com/a/12967>`_ to see the numbers for your board.
 
 Controls
