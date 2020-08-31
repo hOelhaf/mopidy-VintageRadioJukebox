@@ -44,13 +44,17 @@ Configuration
 Before starting Mopidy, you must add configuration for
 Mopidy-VintageRadioJukebox to your Mopidy configuration file::
 
-    [ttsgpio]
+    [VintageRadioJukebox]
     debug_gpio_simulate = false # Set true to emulate GPIO buttons with on screen buttons
-    playlist   = pin, playlistName
-    navigation = pinEncA, pinEncB
-    shutdown   = pin
+    playlist_0 = pin, playlistName
+    ...
+    playlist_n = pin, playlistName
+    nav_EncA = pin
+    nav_EncB = pin   
+    shutdown = pin
     TODO:
-    volume     = pinEncA, pinEncB
+    vol_EncA = pin
+    vol_EncB = pin
 
 You can set the pins you would like to use. The numbers are in BCM mode. You can check `here <http://raspberrypi.stackexchange.com/a/12967>`_ to see the numbers for your board.
 
