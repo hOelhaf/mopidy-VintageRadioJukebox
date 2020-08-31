@@ -7,7 +7,7 @@ from mopidy import config, ext
 
 
 
-__version__ = '1.0.1'
+__version__ = '1.0.0'
 
 
 logger = logging.getLogger(__name__)
@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 class Extension(ext.Extension):
 
-    dist_name = 'Mopidy-TtsGpio'
-    ext_name = 'ttsgpio'
+    dist_name = 'Mopidy-VintageRadioJukebox'
+    ext_name = 'VintageRadioJukebox'
     version = __version__
 
     def get_default_config(self):
@@ -26,16 +26,12 @@ class Extension(ext.Extension):
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
         schema['debug_gpio_simulate'] = config.Boolean()
-        schema['pin_button_main'] = config.Integer()
-        schema['pin_button_next'] = config.Integer()
-        schema['pin_button_previous'] = config.Integer()
-        schema['pin_button_vol_up'] = config.Integer()
-        schema['pin_button_vol_down'] = config.Integer()
-        schema['pin_play_led'] = config.Integer()
-        schema['tts_default_volume'] = config.Integer()
+        schema['nav_EncA'] = config.Integer()
+        schema['nav_EncB'] = config.Integer()
+        schema['shutdown'] = config.Integer()
         return schema
 
     def setup(self, registry):
 
-        from .frontend import TtsGpio
-        registry.add('frontend', TtsGpio)
+        from .frontend import VintageRadioJukebox
+        registry.add('frontend', VintageRadioJukebox)
