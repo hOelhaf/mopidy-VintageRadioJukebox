@@ -11,22 +11,32 @@ from .tts import TTS
 logger = logging.getLogger(__name__)
 
 
-class TtsGpio(pykka.ThreadingActor, core.CoreListener):
+class VintageRadioJukebox(pykka.ThreadingActor, core.CoreListener):
 
     def __init__(self, config, core):
-        super(TtsGpio, self).__init__()
+        super(VintageRadioJukebox, self).__init__()
         self.tts = TTS()
         self.menu = False
         self.core = core
         self.main_menu = MainMenu(self)
 
-        self.debug_gpio_simulate = config['ttsgpio']['debug_gpio_simulate']
+        self.debug_gpio_simulate = config['VintageRadioJukebox']['debug_gpio_simulate']
         if self.debug_gpio_simulate:
             from .gpio_simulator import GpioSimulator
             self.simulator = GpioSimulator(self)
         else:
             from .gpio_input_manager import GPIOManager
             self.gpio_manager = GPIOManager(self, config['ttsgpio'])
+        
+        self.playlistMapping = {}
+        for k, v in config['VintageRadioJukebox'].items():
+            if 'playlist' in k:
+                s = v.split(',')
+                i = int(s[0])
+                playlistMapping[i] = s[1].strip()
+        
+        self.shutdownPin = config['VintageRadioJukebox']['shutdown']
+        self.navPins = (config['VintageRadioJukebox']['nav_EncA'], config['VintageRadioJukebox']['nav_EncB'])
 
     def track_playback_started(self, tl_track):
         self.speak_current_song(tl_track)
