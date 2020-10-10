@@ -1,127 +1,80 @@
 import logging
-import time
-
 import RPi.GPIO as GPIO
 
 logger = logging.getLogger(__name__)
-longpress_time = 0.3
 
+class GPIOButton():
 
-class GPIOManager():
-
-    def __init__(self, frontend, pins):
+    def __init__(self, frontend, channel, callback, cb_context):
 
         self.frontend = frontend
+        self.channel = channel
+        self.callback = callback
+        self.cb_context = cb_context
+        
+        try:
+            # GPIO Mode
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(channel, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+            GPIO.add_event_detect(channel, GPIO.BOTH, callback=self.event_handler, bouncetime=30)
 
-        self.correctlyLoaded = False
+        except RuntimeError:
+            logger.error("GPIOButton: Not enough permission " +
+                         "to use GPIO. GPIO input will not work")
 
-        # Variables to control if it is a longpress
-        self.down_time_previous = -1
-        self.down_time_next = -1
-        self.down_time_main = -1
-        self.down_time_vol_up = -1
-        self.down_time_vol_down = -1
+    def event_handler(self, channel):
+        if GPIO.input(channel) == 1:
+            self.callback(self.cb_context)
 
-        # Play Led
-        self.led_pin = pins['pin_play_led']
+class GPIORotaryEncoder():
+
+    def __init__(self, frontend, channelA, channelB, callback, cb_context):
+
+        self.frontend = frontend
+        self.channelA = channelA
+        self.channelB = channelB
+        self.callback = callback
+        self.cb_context = cb_context
+
+        self.state_A = 0
+        self.state_B = 0
 
         try:
             # GPIO Mode
             GPIO.setmode(GPIO.BCM)
-            GPIO.setup(self.led_pin, GPIO.OUT)
+            GPIO.setup(channelA, GPIO.IN)
+            GPIO.setup(channelB, GPIO.IN)
 
-            # Next Button
-            GPIO.setup(pins['pin_button_next'], GPIO.IN,
-                       pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(pins['pin_button_next'],
-                                  GPIO.BOTH, callback=self.next, bouncetime=30)
+            GPIO.add_event_detect(channelA, GPIO.RISING,
+                                  callback=self.event_handler)
+            self.state_A = GPIO.input(channelA)
 
-            # Previous Button
-            GPIO.setup(pins['pin_button_previous'], GPIO.IN,
-                       pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(pins['pin_button_previous'], GPIO.BOTH,
-                                  callback=self.previous, bouncetime=30)
-
-            # Volume Up Button
-            GPIO.setup(pins['pin_button_vol_up'], GPIO.IN,
-                       pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(pins['pin_button_vol_up'], GPIO.BOTH,
-                                  callback=self.vol_up, bouncetime=30)
-
-            # Volume Down Button
-            GPIO.setup(pins['pin_button_vol_down'], GPIO.IN,
-                       pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(pins['pin_button_vol_down'],
-                                  GPIO.BOTH, callback=self.vol_down,
-                                  bouncetime=30)
-
-            # Main Button
-            GPIO.setup(pins['pin_button_main'], GPIO.IN,
-                       pull_up_down=GPIO.PUD_UP)
-            GPIO.add_event_detect(pins['pin_button_main'],
-                                  GPIO.BOTH, callback=self.main, bouncetime=30)
-
-            self.correctlyLoaded = True
+            GPIO.add_event_detect(channelB, GPIO.RISING,
+                                  callback=self.event_handler)
+            self.state_B = GPIO.input(channelB)
 
         except RuntimeError:
-            logger.error("TTSGPIO: Not enough permission " +
+            logger.error("GPIORotaryEnc: Not enough permission " +
                          "to use GPIO. GPIO input will not work")
 
-    def set_led(self, led_state):
-        if self.correctlyLoaded:
-            GPIO.output(self.led_pin, led_state)
+    def event_handler(self, channel):
+        # read current state of encoder
+        cur_A = GPIO.input(self.channelA)
+        cur_B = GPIO.input(self.channelB)
 
-    def previous(self, channel):
-        if GPIO.input(channel) == 1:
-            if self.down_time_previous >= 0:
-                if self.down_time_previous + longpress_time > time.time():
-                    self.frontend.input({'key': 'previous', 'long': False})
-                else:
-                    self.frontend.input({'key': 'previous', 'long': True})
-            self.down_time_previous = -1
-        else:
-            self.down_time_previous = time.time()
+        # check state changed, ignore bouncing
+        if cur_A == self.state_A and cur_B == self.state_B:
+            return
+        
+        # save current state
+        self.state_A = cur_A
+        self.state_B = cur_B
 
-    def next(self, channel):
-        if GPIO.input(channel) == 1:
-            if self.down_time_next >= 0:
-                if self.down_time_next + longpress_time > time.time():
-                    self.frontend.input({'key': 'next', 'long': False})
-                else:
-                    self.frontend.input({'key': 'next', 'long': True})
-            self.down_time_next = -1
-        else:
-            self.down_time_next = time.time()
-
-    def main(self, channel):
-        if GPIO.input(channel) == 1:
-            if self.down_time_main >= 0:
-                if self.down_time_main + longpress_time > time.time():
-                    self.frontend.input({'key': 'main', 'long': False})
-                else:
-                    self.frontend.input({'key': 'main', 'long': True})
-            self.down_time_main = -1
-        else:
-            self.down_time_main = time.time()
-
-    def vol_up(self, channel):
-        if GPIO.input(channel) == 1:
-            if self.down_time_vol_up >= 0:
-                if self.down_time_vol_up + longpress_time > time.time():
-                    self.frontend.input({'key': 'volume_up', 'long': False})
-                else:
-                    self.frontend.input({'key': 'volume_up', 'long': True})
-            self.down_time_vol_up = -1
-        else:
-            self.down_time_vol_up = time.time()
-
-    def vol_down(self, channel):
-        if GPIO.input(channel) == 1:
-            if self.down_time_vol_down >= 0:
-                if self.down_time_vol_down + longpress_time > time.time():
-                    self.frontend.input({'key': 'volume_down', 'long': False})
-                else:
-                    self.frontend.input({'key': 'volume_down', 'long': True})
-            self.down_time_vol_down = -1
-        else:
-            self.down_time_vol_down = time.time()
+        # determine turning direction
+        if cur_A == cur_B:
+            if channel == self.channelA:
+                self.callback(self.cb_context, +1)
+            else:
+                self.callback(self.cb_context, -1)
+        
+        return
