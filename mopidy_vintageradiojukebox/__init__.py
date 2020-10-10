@@ -9,7 +9,6 @@ from mopidy import config, ext
 
 __version__ = '1.0.0'
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -25,10 +24,8 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        schema['debug_gpio_simulate'] = config.Boolean()
-        schema['nav_EncA'] = config.Integer()
-        schema['nav_EncB'] = config.Integer()
-        schema['shutdown'] = config.Integer()
+        for pin in range(28):
+            schema[f"bcm{pin:d}"] = config.String()
         return schema
 
     def setup(self, registry):
