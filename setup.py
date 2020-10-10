@@ -35,7 +35,7 @@ setup(
     ],
     entry_points={
         'mopidy.ext': [
-            'vintageradiojukebox = mopidy_vintageradiojukebox:Extension',
+            'VintageRadioJukebox = mopidy_vintageradiojukebox:Extension',
         ],
     },
     classifiers=[
